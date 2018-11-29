@@ -12,8 +12,6 @@ import matplotlib.pyplot as plt
 #API_KEY  !DO NOT TOUCH!
 API_KEY = '4HNDQOUQ2A1G90RW'
 
-
-
 def make_df(symbol):
     
     #Dont use this one for testing, only deployemnt
@@ -23,13 +21,22 @@ def make_df(symbol):
     url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
     data = pd.read_csv(url, index_col="timestamp", parse_dates = True)
     data.index.names = ['Date']
+    
 
     return (data)
 
 
 def show_data(df):
-    df['close'].plot()
+    df['close'].plot(color ='r', label = symbol_save)
+    df['open'].plot(color ='b', label = symbol_save)
+    plt.legend()
     plt.show()
     return
 
 
+def test(symbol):
+    global symbol_save
+    symbol_save = symbol
+    return
+
+    
