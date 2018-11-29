@@ -12,6 +12,17 @@ import matplotlib.pyplot as plt
 #API_KEY  !DO NOT TOUCH!
 API_KEY = '4HNDQOUQ2A1G90RW'
 
+#api_url = https://api.iextrading.com/1.0/stock/aapl/batch?types=quote,news,chart&range=1m&last=10
+
+'''
+#this is a test function to see if we can streamline code. Dont touch/worry about this right now
+def pass_symbol(symbol_passed):
+    global symbol
+    symbol = symbol_passed
+    return
+'''
+
+#this function makes the dataframe from the CSV given from teh API. It cleans up the rows and sets the index column to the dates
 def make_df(symbol):
     
     #Dont use this one for testing, only deployemnt
@@ -20,35 +31,51 @@ def make_df(symbol):
     #generates the URL based on the symbol imported and gets the JSON data from the API if file hasn't been written before
     url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
     data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
-    data.index.names = ['Date']
-    
-
+    data.index.names = ['date']
+    print("DF Created!")
     return (data)
 
 
-def show_data(df):
-    df['close'].plot(color ='r', label = symbol_save)
-    df['open'].plot(color ='b', label = symbol_save)
+#makes new columns to add to the DF it is passed
+def add_fluctuation(df):
+    df['fluctuation'] = 100*(df['high']-df['low'])/df['close']
+    return (df)
+
+#makes a summary of todays stock information
+def todays_summary(df):
+    open_price = '${:,.2f}'.format(df.iloc[0]['open'])
+    high_price = '${:,.2f}'.format(df.iloc[0]['high'])
+    low_price = '${:,.2f}'.format(df.iloc[0]['low'])
+    close_price = '${:,.2f}'.format(df.iloc[0]['close'])
+    volume = "{:,}".format(int(df.iloc[0]['volume']))
+    fluctuation = '{:.2f}'.format(df.iloc[0]['fluctuation'])
+    
+    print("Todays Opening Price: ", open_price)
+    print("Todays Highest Price: ", high_price)
+    print("Todays Lowest Price: ", low_price)
+    print("Todays Closing Price: ", close_price)
+    print("Todays Trading Volume: ", volume)
+    print("Todays Price Fluctuation: ", fluctuation,"%")
+    return
+
+
+#diaplsy the open and close price vs date in a graph 
+def graph_open(df,symbol):
+    df['close'].plot(color ='r', label = symbol)
+    df['open'].plot(color ='b', label = symbol)
     plt.legend()
     plt.show()
     return
 
 
-def test(symbol):
-    global symbol_save
-    symbol_save = symbol
-    return
-
-def to_csv():
-    #Dont use this one for testing, only deployemnt
-    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol_save + '&outputsize=full&datatype=csv&apikey=' + API_KEY
+#gets todays news articles for the stock 
+def news(symbol):
     
-    csv_name = 'final-project-stuart-s-suicide-squad/csv_files/' + symbol_save.lower() + "_data.csv"
-
-    #generates the URL based on the symbol imported and gets the JSON data from the API if file hasn't been written before
-    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
-    data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
-    data.index.names = ['Date']
-    return
-
+    url = 'https://api.iextrading.com/1.0/stock/' + symbol.lower() + '/batch?types=news&last=5'
+    news = requests.get(url)
+    news_json_str = news.content
+    news_data = json.loads(news_json_str)
     
+    news_article = news_data['news'][0]['url']
+    print(news_article)
+    return
