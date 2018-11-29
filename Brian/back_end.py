@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 API_KEY = '4HNDQOUQ2A1G90RW'
 
 
+
 def make_df(symbol):
     
     #Dont use this one for testing, only deployemnt
