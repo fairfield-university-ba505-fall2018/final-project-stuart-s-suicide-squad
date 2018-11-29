@@ -15,11 +15,11 @@ API_KEY = '4HNDQOUQ2A1G90RW'
 def make_df(symbol):
     
     #Dont use this one for testing, only deployemnt
-    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol + '&outputsize=full&datatype=csv&apikey=' + API_KEY
+    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol_save + '&outputsize=full&datatype=csv&apikey=' + API_KEY
 
     #generates the URL based on the symbol imported and gets the JSON data from the API if file hasn't been written before
     url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
-    data = pd.read_csv(url, index_col="timestamp", parse_dates = True)
+    data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
     data.index.names = ['Date']
     
 
@@ -37,6 +37,18 @@ def show_data(df):
 def test(symbol):
     global symbol_save
     symbol_save = symbol
+    return
+
+def to_csv():
+    #Dont use this one for testing, only deployemnt
+    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol_save + '&outputsize=full&datatype=csv&apikey=' + API_KEY
+    
+    csv_name = 'final-project-stuart-s-suicide-squad/csv_files/' + symbol_save.lower() + "_data.csv"
+
+    #generates the URL based on the symbol imported and gets the JSON data from the API if file hasn't been written before
+    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
+    data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
+    data.index.names = ['Date']
     return
 
     
