@@ -15,6 +15,9 @@ API_KEY = '4HNDQOUQ2A1G90RW'
 #api link for later if we want to use [news and things like that]
 #api_url = https://api.iextrading.com/1.0/stock/aapl/batch?types=quote,news,chart&range=1m&last=10
 
+#api link for stock twits and sentiment analysis if we want
+#https://api.stocktwits.com/api/2/streams/symbol/AAPL.json
+
 
 
 '''
