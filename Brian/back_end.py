@@ -22,6 +22,19 @@ def pass_symbol(symbol_passed):
     return
 '''
 
+#makes a list of inuts for the user to enter to  
+def get_stocks():
+    
+    stock_symbols = []
+    while True:
+        symbol = input("Enter a stock symbol: ").upper()
+        
+        if len(stock_symbols) >= 4 or symbol.lower() == "no":
+            break
+        else:
+            stock_symbols.append(symbol)
+    return(stock_symbols)
+
 #this function makes the dataframe from the CSV given from teh API. It cleans up the rows and sets the index column to the dates
 def make_df(symbol):
     

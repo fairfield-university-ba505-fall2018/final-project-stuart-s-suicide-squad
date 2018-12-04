@@ -9,6 +9,10 @@ import os.path
 #API_KEY  !DO NOT TOUCH!
 API_KEY = '4HNDQOUQ2A1G90RW'
 
+def test_fun():
+    #symbol = input("Enter a stock symbol: ").upper()
+    print("test worked")
+    return
 
 
 #get the JSON values for the entred symbols
