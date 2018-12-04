@@ -9,10 +9,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-#API_KEY  !DO NOT TOUCH!
+#API_KEY FOR ALPHAVANTAGE API !DO NOT TOUCH!
 API_KEY = '4HNDQOUQ2A1G90RW'
 
+#api link for later if we want to use [news and things like that]
 #api_url = https://api.iextrading.com/1.0/stock/aapl/batch?types=quote,news,chart&range=1m&last=10
+
+
 
 '''
 #this is a test function to see if we can streamline code. Dont touch/worry about this right now
@@ -73,7 +76,7 @@ def todays_summary(df):
 
 
 #diaplsy the open and close price vs date in a graph 
-def graph_open(df,symbol):
+def graph(df,symbol):
     df['close'].plot(color ='r', label = symbol)
     df['open'].plot(color ='b', label = symbol)
     plt.legend()
@@ -89,6 +92,10 @@ def news(symbol):
     news_json_str = news.content
     news_data = json.loads(news_json_str)
     
-    news_article = news_data['news'][0]['url']
-    print(news_article)
+    print('\033[1m' + "Todays News", '\n')
+    for x in range(0,5):
+        news_headline = news_data['news'][x]['headline']
+        news_url = news_data['news'][x]['url']
+        output = str(x) + ") " + news_headline + " [URL:" + news_url + "]"
+        print('\033[0m' + output)
     return
