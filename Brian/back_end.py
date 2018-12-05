@@ -45,20 +45,39 @@ def get_stocks():
 def make_df(symbol):
     
     #Dont use this one for testing, only deployemnt
-    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol_save + '&outputsize=full&datatype=csv&apikey=' + API_KEY
+    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol + '&outputsize=full&datatype=csv&apikey=' + API_KEY
 
     #generates the URL based on the symbol imported and gets the JSON data from the API if file hasn't been written before
-    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
+    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
     data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
     data.index.names = ['date']
     print("DF Created!")
     return (data)
 
 
-#makes new columns to add to the DF it is passed
-def add_fluctuation(df):
+#adding oc_var, volatility, fluctuation, MA(5), MA(30) & MA(252)
+def mod_df(df):
     df['fluctuation'] = 100*(df['high']-df['low'])/df['close']
+    df['oc_var'] = df['open'] - df['close']
+    df['volatility'] = df['high'] - df['low']
+    df['ma(5)'] = df['close'].rolling(5).mean()
+    df['ma(50)'] = df['close'].rolling(50).mean()
+    df['ma(200)'] = df['close'].rolling(200).mean()
+    df['date'] = df.index
+    df['dow'] = df['date'].dt.day_name()
+    df['month'] = df['date'].dt.month_name()
+    df['year'] = df['date'].dt.year
+    
+    
+    
+    rmse_ma5 = (((df['ma(5)'] - df['close'])**2).mean())**.5
+    rmse_ma50 = (((df['ma(50)'] - df['close'])**2).mean())**.5
+    rmse_ma200 = (((df['ma(200)'] - df['close'])**2).mean())**.5
+    print("RMSE of MA(5) is: ", '{:,.2f}'.format(rmse_ma5)) 
+    print("RMSE of MA(50) is: ", '{:,.2f}'.format(rmse_ma50))
+    print("RMSE of MA(200) is: ", '{:,.2f}'.format(rmse_ma200))
     return (df)
+
 
 #makes a summary of todays stock information
 def todays_summary(df):
@@ -74,16 +93,73 @@ def todays_summary(df):
     print("Todays Lowest Price: ", low_price)
     print("Todays Closing Price: ", close_price)
     print("Todays Trading Volume: ", volume)
-    print("Todays Price Fluctuation: ", fluctuation,"%")
+    print("Todays Price Fluctuation: ", str(fluctuation) + "%")
     return
 
 
-#diaplsy the open and close price vs date in a graph 
-def graph(df,symbol):
-    df['close'].plot(color ='r', label = symbol)
-    df['open'].plot(color ='b', label = symbol)
+
+def plot_price_vs_dow(df):
+    
+    days = ['Monday','Tuesday','Wednesday','Thursday','Friday']
+    week_df = df['close'].groupby(df['dow']).mean().reindex(days)
+    
+    upper_limit = week_df.max()
+    lower_limit = week_df.min()
+    
+    upper_limit = upper_limit + (upper_limit*0.01)
+    lower_limit = lower_limit - (lower_limit*0.01)
+    
+    week_df.plot(color ='r', label ='AMZN', kind = 'bar', ylim=(lower_limit,upper_limit))
     plt.legend()
     plt.show()
+
+    return
+
+def plot_price_vs_month(df):
+    
+    months = ['January','February','March','April','May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    month_df = df['close'].groupby(df['month']).mean().reindex(months)
+    
+    upper_limit = month_df.max()
+    lower_limit = month_df.min()
+    
+    upper_limit = upper_limit + (upper_limit*0.01)
+    lower_limit = lower_limit - (lower_limit*0.01)
+    
+    month_df.plot(color ='r', label ='AMZN', kind = 'bar', ylim=(lower_limit,upper_limit))
+    plt.legend()
+    plt.show()
+
+    return
+
+
+#diaplsy the  close price vs date in a graph 
+def plot_price_vs_time(df):
+    df['close'].plot(color ='r', label ='AMZN')
+    plt.legend()
+    plt.show()
+    return
+
+#plot the flucuation by day 
+def plot_fluc_vs_time(df):
+    df['fluctuation'].plot(color ='r', label ='AMZN')
+    plt.legend()
+    plt.show()
+    return
+
+
+#plot the volume vs volatiltiy
+def plot_volume_vs_volatiltiy(df):
+    volume = df['volume']
+    volatility = df['volatility']
+    
+    correlation = df['volume'].corr(df['fluctuation'])
+    print('Correlation: ',correlation)
+   #format and display plot
+    plt.scatter(x = volatility, y = volume, c='b', alpha = .2)
+    plt.xlabel('Volatility')
+    plt.ylabel('Volume')
+    plt.show();
     return
 
 
@@ -98,7 +174,6 @@ def news(symbol):
     print('\033[1m' + "Todays News", '\n')
     for x in range(0,5):
         news_headline = news_data['news'][x]['headline']
-        news_url = news_data['news'][x]['url']
-        output = str(x) + ") " + news_headline + " [URL:" + news_url + "]"
+        output = str(x) + ") " + news_headline
         print('\033[0m' + output)
     return
