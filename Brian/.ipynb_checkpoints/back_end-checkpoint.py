@@ -45,10 +45,10 @@ def get_stocks():
 def make_df(symbol):
     
     #Dont use this one for testing, only deployemnt
-    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=full&datatype=csv&apikey=' + API_KEY
+    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=full&datatype=csv&apikey=' + API_KEY
 
     #generates the URL based on the symbol imported and gets the JSON data from the API if file hasn't been written before
-    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
+    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
     data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
     data['close'] = data['adjusted_close']
     data.index.names = ['date']
@@ -154,7 +154,7 @@ def plot_volume_vs_volatiltiy(df):
     volume = df['volume']
     volatility = df['volatility']
     
-    correlation = df['volume'].corr(df['fluctuation'])
+    correlation = df['volume'].corr(df['volatility'])
     print('Correlation: ',correlation)
    #format and display plot
     plt.scatter(x = volatility, y = volume, c='b', alpha = .2)
