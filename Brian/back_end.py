@@ -8,6 +8,7 @@ import os.path
 import numpy as np
 import matplotlib.pyplot as plt
 from time import sleep
+from textblob import TextBlob
 
 #API_KEY FOR ALPHAVANTAGE API !DO NOT TOUCH!
 API_KEY = '4HNDQOUQ2A1G90RW'
@@ -31,23 +32,26 @@ def pass_symbol(symbol_passed):
 #makes a list of inuts for the user to enter to  
 def get_stocks():
     stock_symbols = []
+    symbol = ""
+    
     while True:
-        symbol = input("Enter a stock symbol: ").upper()
+        #symbol = input("Enter a stock symbol: ").upper()
         if len(stock_symbols) >= 4 or symbol.lower() == "no":
             break
         else:
-            
-            stock_symbols.append(symbol)
+            symbol = input("Enter a stock symbol: ").upper()
+            if symbol.lower() != "no":
+                stock_symbols.append(symbol)
     return(stock_symbols)
 
 #this function makes the dataframe from the CSV given from teh API. It cleans up the rows and sets the index column to the dates
 def make_df(symbol):
     
     #Dont use this one for testing, only deployemnt
-    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=full&datatype=csv&apikey=' + API_KEY
+    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=full&datatype=csv&apikey=' + API_KEY
 
     #generates the URL based on the symbol imported and gets the JSON data from the API if file hasn't been written before
-    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
+    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
     data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
     data['close'] = data['adjusted_close']
     data.index.names = ['date']
@@ -60,7 +64,9 @@ def make_df2(symbols):
     stock_df = []
     
     for x in symbols:
-        url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + x + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
+        #Dont use this one for testing, only deployemnt
+        url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + x + '&outputsize=full&datatype=csv&apikey=' + API_KEY
+        #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + x + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
         data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
         data['close'] = data['adjusted_close']
         data.index.names = ['date']
@@ -190,9 +196,19 @@ def news(symbol):
     for x in range(0,length):
         
         news_headline = news_data['news'][x]['headline']
-        output = str(x + 1) + ") " + news_headline
+        sentiment = sent_analysis(news_headline)
+        output = str(x + 1) + ") " + news_headline + "[" + sentiment + "]"
         print('\033[0m' + output)
         
     print('\n')
     
     return
+
+
+def sent_analysis(headline):
+    testimonial = TextBlob(headline)
+    sentiment = float(testimonial.sentiment.polarity) * 100
+    sent_formatted = '{:.1f}'.format(sentiment)
+    string_sent = str(sent_formatted) + "%"
+    
+    return(string_sent)
