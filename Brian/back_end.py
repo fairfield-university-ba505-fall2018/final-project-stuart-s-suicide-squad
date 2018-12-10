@@ -13,23 +13,12 @@ from textblob import TextBlob
 #API_KEY FOR ALPHAVANTAGE API !DO NOT TOUCH!
 API_KEY = '4HNDQOUQ2A1G90RW'
 
-#api link for later if we want to use [news and things like that]
-#api_url = https://api.iextrading.com/1.0/stock/aapl/batch?types=quote,news,chart&range=1m&last=10
-
 #api link for stock twits and sentiment analysis if we want
 #https://api.stocktwits.com/api/2/streams/symbol/AAPL.json
 
 
 
-'''
-#this is a test function to see if we can streamline code. Dont touch/worry about this right now
-def pass_symbol(symbol_passed):
-    global symbol
-    symbol = symbol_passed
-    return
-'''
-
-#makes a list of inuts for the user to enter to  
+#makes a list of inputs for the user to enter to  
 def get_stocks():
     stock_symbols = []
     symbol = ""
@@ -44,28 +33,17 @@ def get_stocks():
                 stock_symbols.append(symbol)
     return(stock_symbols)
 
-#this function makes the dataframe from the CSV given from teh API. It cleans up the rows and sets the index column to the dates
-def make_df(symbol):
-    
-    #Dont use this one for testing, only deployemnt
-    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=full&datatype=csv&apikey=' + API_KEY
 
-    #generates the URL based on the symbol imported and gets the JSON data from the API if file hasn't been written before
-    #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + symbol + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
-    data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
-    data['close'] = data['adjusted_close']
-    data.index.names = ['date']
-    print("DF Created!")
-    return (data)
-
-
-def make_df2(symbols):
+#makes DF's from the passed list of symbols, makes theindex column dates with a dateTime object, overwrites the 'close' column with an adjusted value to include splits in price
+def make_df(symbols): 
 
     stock_df = []
     
     for x in symbols:
         #Dont use this one for testing, only deployemnt
         url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + x + '&outputsize=full&datatype=csv&apikey=' + API_KEY
+        
+        #use this one for testing
         #url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=' + x + '&outputsize=compact&datatype=csv&apikey=' + API_KEY
         data = pd.read_csv(url, index_col="timestamp", parse_dates = True, na_values = ' ')
         data['close'] = data['adjusted_close']
@@ -86,17 +64,20 @@ def mod_df(df):
     df['dow'] = df['date'].dt.day_name()
     df['month'] = df['date'].dt.month_name()
     df['year'] = df['date'].dt.year
-    
-    
-    
+
+    return (df)
+
+
+
+def predict(df):
     rmse_ma5 = (((df['ma(5)'] - df['close'])**2).mean())**.5
     rmse_ma50 = (((df['ma(50)'] - df['close'])**2).mean())**.5
     rmse_ma200 = (((df['ma(200)'] - df['close'])**2).mean())**.5
     print("RMSE of MA(5) is: ", '{:,.2f}'.format(rmse_ma5)) 
     print("RMSE of MA(50) is: ", '{:,.2f}'.format(rmse_ma50))
     print("RMSE of MA(200) is: ", '{:,.2f}'.format(rmse_ma200))
-    return (df)
-
+    
+    return
 
 #makes a summary of todays stock information
 def todays_summary(df):
@@ -172,8 +153,8 @@ def plot_volume_vs_volatiltiy(df, symbol):
     volume = df['volume']
     volatility = df['volatility']
     
-    correlation = df['volume'].corr(df['volatility'])
-    print('Correlation: ',correlation)
+    correlation = volume.corr(volatility)
+    print('Correlation1: ',correlation)
    #format and display plot
     plt.scatter(x = volatility, y = volume, c='b', alpha = .2)
     plt.xlabel('Volatility')
