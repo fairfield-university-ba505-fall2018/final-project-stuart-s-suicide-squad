@@ -61,7 +61,7 @@ def mod_df(df):
     df['ma(50)'] = df['close'].rolling(50).mean()
     df['ma(200)'] = df['close'].rolling(200).mean()
     df['date'] = df.index
-    df['dow'] = df['date'].dt.day_name()
+    df['day'] = df['date'].dt.day_name()
     df['month'] = df['date'].dt.month_name()
     df['year'] = df['date'].dt.year
 
@@ -86,9 +86,9 @@ def todays_summary(df):
     low_price = '${:,.2f}'.format(df.iloc[0]['low'])
     close_price = '${:,.2f}'.format(df.iloc[0]['close'])
     volume = "{:,}".format(int(df.iloc[0]['volume']))
-    fluctuation = '${:.2f}'.format(df.iloc[0]['fluctuation'])
     oc_var = '${:.2f}'.format(df.iloc[0]['oc_var'])
-    volatility = '{:.2f}'.format(df.iloc[0]['volatility'])
+    volatility = '${:.2f}'.format(df.iloc[0]['volatility'])
+    fluctuation = '{:.2f}'.format(df.iloc[0]['fluctuation'])
     
     print("Todays Opening Price: ", open_price)
     print("Todays Highest Price: ", high_price)
@@ -106,7 +106,7 @@ def todays_summary(df):
 def plot_price_vs_day(df, symbol):
     
     days = ['Monday','Tuesday','Wednesday','Thursday','Friday']
-    week_df = df['close'].groupby(df['dow']).mean().reindex(days)
+    week_df = df['close'].groupby(df['day']).mean().reindex(days)
     
     upper_limit = week_df.max()
     lower_limit = week_df.min()
@@ -114,7 +114,7 @@ def plot_price_vs_day(df, symbol):
     upper_limit = upper_limit + (upper_limit*0.01)
     lower_limit = lower_limit - (lower_limit*0.01)
     
-    week_df.plot(color ='b', label =symbol, kind = 'bar', ylim=(lower_limit,upper_limit))
+    week_df.plot(color ='b', label =symbol, alpha = .7, kind = 'bar', ylim=(lower_limit,upper_limit))
     plt.title("Price vs. Day")
     plt.legend()
     plt.show()
@@ -132,7 +132,7 @@ def plot_price_vs_month(df, symbol):
     upper_limit = upper_limit + (upper_limit*0.01)
     lower_limit = lower_limit - (lower_limit*0.01)
     
-    month_df.plot(color ='b', label = symbol, kind = 'bar', ylim=(lower_limit,upper_limit))
+    month_df.plot(color ='b', label = symbol, kind = 'bar', alpha = .7, ylim=(lower_limit,upper_limit))
     plt.title("Price vs. Month")
     plt.legend()
     plt.show()
@@ -142,7 +142,7 @@ def plot_price_vs_month(df, symbol):
 
 #diaplsy the  close price vs date in a graph 
 def plot_price_vs_time(df, symbol):
-    df['close'].plot(color ='b', label = symbol)
+    df['close'].plot(color ='b', label = symbol, alpha = .7)
     plt.title("Price vs. Time")
     plt.legend()
     plt.show()
@@ -150,7 +150,7 @@ def plot_price_vs_time(df, symbol):
 
 #plot the flucuation by day 
 def plot_fluc_vs_time(df, symbol):
-    df['fluctuation'].plot(color ='b', label = symbol)
+    df['fluctuation'].plot(color ='b', label = symbol, alpha = .7)
     plt.title("Fluction vs. Time")
     plt.legend()
     plt.show()
