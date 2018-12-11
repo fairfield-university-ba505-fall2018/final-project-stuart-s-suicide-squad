@@ -2,7 +2,7 @@
 
 Brought to you by: Brian Walsh, Thomas Moroski and Stuart Weinstein
 
-Our goal was to develop an interactive dashboard where users can get descriptive statistics on any US stock.
+Our goal was to develop an interactive dashboard where users can get descriptive statistics, visual interpreations of the data, as well as live feeds on StockTwits and News articles for any US stock.
 
 ## How to Run our Program
 
@@ -12,7 +12,7 @@ This will allow you to simply run the program through the jupyter notebook.
 
 ## Sections 
 
-1. The end user may add up to 4 stock ticker symbols
+1. Enter Up to 4 Stock Symbols
 2. The application will then provide a quick analysis including Fluctuation, Volatility, % Term Moving Average, 5, 50 and 200 day Moving Averages.
 3. A one step ahead forecast of the next price is provided with the RMSE (Root Mean Square Error score provided)for each Moving Average
 4. A current summary of the day's performance for each ticker is provided

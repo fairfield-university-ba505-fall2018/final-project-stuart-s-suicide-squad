@@ -75,7 +75,7 @@ def predict(df):
     rmse_ma200 = (((df['ma(200)'] - df['close'])**2).mean())**.5
     print("RMSE of MA(5) is: ", '{:,.2f}'.format(rmse_ma5)) 
     print("RMSE of MA(50) is: ", '{:,.2f}'.format(rmse_ma50))
-    print("RMSE of MA(200) is: ", '{:,.2f}'.format(rmse_ma200))
+    print("RMSE of MA(200) is: ", '{:,.2f}'.format(rmse_ma200), '\n')
     
     return
 
@@ -86,19 +86,24 @@ def todays_summary(df):
     low_price = '${:,.2f}'.format(df.iloc[0]['low'])
     close_price = '${:,.2f}'.format(df.iloc[0]['close'])
     volume = "{:,}".format(int(df.iloc[0]['volume']))
-    fluctuation = '{:.2f}'.format(df.iloc[0]['fluctuation'])
+    fluctuation = '${:.2f}'.format(df.iloc[0]['fluctuation'])
+    oc_var = '${:.2f}'.format(df.iloc[0]['oc_var'])
+    volatility = '{:.2f}'.format(df.iloc[0]['volatility'])
     
     print("Todays Opening Price: ", open_price)
     print("Todays Highest Price: ", high_price)
     print("Todays Lowest Price: ", low_price)
     print("Todays Closing Price: ", close_price)
     print("Todays Trading Volume: ", volume)
+    print("Todays Open/Close Variance: ", oc_var)
+    print("Todays Volatility: ", volatility)
     print("Todays Price Fluctuation: ", str(fluctuation) + "%" + '\n')
+    
     return
 
 
 
-def plot_price_vs_dow(df, symbol):
+def plot_price_vs_day(df, symbol):
     
     days = ['Monday','Tuesday','Wednesday','Thursday','Friday']
     week_df = df['close'].groupby(df['dow']).mean().reindex(days)
@@ -109,7 +114,8 @@ def plot_price_vs_dow(df, symbol):
     upper_limit = upper_limit + (upper_limit*0.01)
     lower_limit = lower_limit - (lower_limit*0.01)
     
-    week_df.plot(color ='r', label =symbol, kind = 'bar', ylim=(lower_limit,upper_limit))
+    week_df.plot(color ='b', label =symbol, kind = 'bar', ylim=(lower_limit,upper_limit))
+    plt.title("Price vs. Day")
     plt.legend()
     plt.show()
 
@@ -126,7 +132,7 @@ def plot_price_vs_month(df, symbol):
     upper_limit = upper_limit + (upper_limit*0.01)
     lower_limit = lower_limit - (lower_limit*0.01)
     
-    month_df.plot(color ='g', label = symbol, kind = 'bar', ylim=(lower_limit,upper_limit))
+    month_df.plot(color ='b', label = symbol, kind = 'bar', ylim=(lower_limit,upper_limit))
     plt.title("Price vs. Month")
     plt.legend()
     plt.show()
@@ -144,7 +150,7 @@ def plot_price_vs_time(df, symbol):
 
 #plot the flucuation by day 
 def plot_fluc_vs_time(df, symbol):
-    df['fluctuation'].plot(color ='r', label = symbol)
+    df['fluctuation'].plot(color ='b', label = symbol)
     plt.title("Fluction vs. Time")
     plt.legend()
     plt.show()
@@ -155,15 +161,16 @@ def plot_fluc_vs_time(df, symbol):
 def plot_volume_vs_volatiltiy(df, symbol):
     volume = df['volume']
     volatility = df['volatility']
-    
-    correlation = volume.corr(volatility)
-    print('Correlation1: ',correlation)
+
    #format and display plot
     plt.scatter(x = volatility, y = volume, c='b', alpha = .2)
     plt.xlabel('Volatility')
     plt.ylabel('Volume')
     plt.title(symbol)
     plt.show();
+    
+    correlation = volume.corr(volatility)
+    print('Correlation1: ',correlation)
     return
 
 
@@ -189,10 +196,54 @@ def news(symbol):
     return
 
 
-def sent_analysis(headline):
-    testimonial = TextBlob(headline)
+
+#gets todays news articles for the stock 
+def stock_twits(symbol):
+    
+    sleep(3)
+    url = 'https://api.stocktwits.com/api/2/streams/symbol/' + symbol.upper() + '.json'
+    stock_twits = requests.get(url)
+    stock_twits_json_str = stock_twits.content
+    stock_twits_data = json.loads(stock_twits_json_str)
+    length = len(stock_twits_data['messages'])
+    total_sent = 0
+    
+    for x in range(0,length):
+        
+        message = stock_twits_data['messages'][x]['body']
+        sentiment = stocktwits_sent_analysis(message)
+        total_sent = total_sent + sentiment
+        sent_formatted = '{:.1f}'.format(sentiment)
+        string_sent = str(sent_formatted) + "%"
+        output = str(x + 1) + ") " + message + "[" + string_sent + "]"
+        print('\033[0m' + output)
+        
+    
+    total_sent = total_sent/30
+    total_sent = '{:.1f}'.format(total_sent)
+    print('\n')
+    print("Total Sentiment Score: " + str(total_sent))
+    
+    return
+
+
+def sent_analysis(text):
+    testimonial = TextBlob(text)
     sentiment = float(testimonial.sentiment.polarity) * 100
     sent_formatted = '{:.1f}'.format(sentiment)
     string_sent = str(sent_formatted) + "%"
     
     return(string_sent)
+
+def stocktwits_sent_analysis(text):
+    testimonial = TextBlob(text)
+    sentiment = float(testimonial.sentiment.polarity) * 100
+    
+    return(sentiment)
+
+def line():
+    line = ""
+    for x in range(0,150):
+        line = line + "*"
+    print(line)
+    return
