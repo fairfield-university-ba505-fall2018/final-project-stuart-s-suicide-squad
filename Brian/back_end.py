@@ -52,7 +52,7 @@ def make_df(symbols):
     
     return(stock_df)
 
-#adding oc_var, volatility, fluctuation, MA(5), MA(30) & MA(252)
+#adding oc_var, volatility, fluctuation, MA(5), MA(50) & MA(200)
 def mod_df(df):
     df['fluctuation'] = 100*(df['high']-df['low'])/df['close']
     df['oc_var'] = df['open'] - df['close']
