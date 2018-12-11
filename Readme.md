@@ -12,4 +12,7 @@ This will allow you to simply run the program through the jupyter notebook.
 
 1. Enter the first section and describe what it does
 2. Enetr the next and describe what it does (etc..)
-3. 
+
+
+## Resources
+If there are any issues plesase reach our to brian.walsh@student.fairfield.edu or [add your emails here]
