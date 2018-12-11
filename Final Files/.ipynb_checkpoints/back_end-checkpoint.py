@@ -1,6 +1,6 @@
 
 #imports that we need
-import requests
+import requests 
 import json
 import csv
 import pandas as pd
@@ -12,6 +12,9 @@ from textblob import TextBlob
 
 #API_KEY FOR ALPHAVANTAGE API !DO NOT TOUCH!
 API_KEY = '4HNDQOUQ2A1G90RW'
+
+#colors for the graphs
+clrs = ['r','b','g','k']
 
 #api link for stock twits and sentiment analysis if we want
 #https://api.stocktwits.com/api/2/streams/symbol/AAPL.json
@@ -68,7 +71,7 @@ def mod_df(df):
     return (df)
 
 
-
+#calculate the errors for the moving average calculations
 def predict(df):
     rmse_ma5 = (((df['ma(5)'] - df['close'])**2).mean())**.5
     rmse_ma50 = (((df['ma(50)'] - df['close'])**2).mean())**.5
@@ -102,8 +105,8 @@ def todays_summary(df):
     return
 
 
-
-def plot_price_vs_day(df, symbol):
+#plot the avg price vs day of the week
+def plot_price_vs_day(df, symbol,x):
     
     days = ['Monday','Tuesday','Wednesday','Thursday','Friday']
     week_df = df['close'].groupby(df['day']).mean().reindex(days)
@@ -114,14 +117,15 @@ def plot_price_vs_day(df, symbol):
     upper_limit = upper_limit + (upper_limit*0.01)
     lower_limit = lower_limit - (lower_limit*0.01)
     
-    week_df.plot(color ='b', label =symbol, alpha = .7, kind = 'bar', ylim=(lower_limit,upper_limit))
+    week_df.plot(color=clrs[x], label =symbol, alpha = .7, kind = 'bar', ylim=(lower_limit,upper_limit))
     plt.title("Price vs. Day")
     plt.legend()
     plt.show()
 
     return
 
-def plot_price_vs_month(df, symbol):
+#plot the avg price vs month
+def plot_price_vs_month(df, symbol,x):
     
     months = ['January','February','March','April','May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     month_df = df['close'].groupby(df['month']).mean().reindex(months)
@@ -129,10 +133,11 @@ def plot_price_vs_month(df, symbol):
     upper_limit = month_df.max()
     lower_limit = month_df.min()
     
+    #scale the graphs dynamically on the axis
     upper_limit = upper_limit + (upper_limit*0.01)
     lower_limit = lower_limit - (lower_limit*0.01)
     
-    month_df.plot(color ='b', label = symbol, kind = 'bar', alpha = .7, ylim=(lower_limit,upper_limit))
+    month_df.plot(color=clrs[x], label = symbol, kind = 'bar', alpha = .7, ylim=(lower_limit,upper_limit))
     plt.title("Price vs. Month")
     plt.legend()
     plt.show()
@@ -141,16 +146,17 @@ def plot_price_vs_month(df, symbol):
 
 
 #diaplsy the  close price vs date in a graph 
-def plot_price_vs_time(df, symbol):
-    df['close'].plot(color ='b', label = symbol, alpha = .7)
+def plot_price_vs_time(df, symbol,x):
+    df['close'].plot(color=clrs[x], label = symbol, alpha = .7)
     plt.title("Price vs. Time")
     plt.legend()
     plt.show()
     return
 
+
 #plot the flucuation by day 
-def plot_fluc_vs_time(df, symbol):
-    df['fluctuation'].plot(color ='b', label = symbol, alpha = .7)
+def plot_fluc_vs_time(df, symbol,x):
+    df['fluctuation'].plot(color=clrs[x], label = symbol, alpha = .7)
     plt.title("Fluction vs. Time")
     plt.legend()
     plt.show()
@@ -158,12 +164,13 @@ def plot_fluc_vs_time(df, symbol):
 
 
 #plot the volume vs volatiltiy
-def plot_volume_vs_volatiltiy(df, symbol):
+def plot_volume_vs_volatiltiy(df, symbol,x):
+    
     volume = df['volume']
     volatility = df['volatility']
 
    #format and display plot
-    plt.scatter(x = volatility, y = volume, c='b', alpha = .2)
+    plt.scatter(x = volatility, y = volume, color=clrs[x], alpha = .2)
     plt.xlabel('Volatility')
     plt.ylabel('Volume')
     plt.title(symbol)
@@ -177,6 +184,7 @@ def plot_volume_vs_volatiltiy(df, symbol):
 #gets todays news articles for the stock 
 def news(symbol):
     
+    #gets the data from the API
     sleep(3)
     url = 'https://api.iextrading.com/1.0/stock/' + symbol.lower() + '/batch?types=news&last=5'
     news = requests.get(url)
@@ -184,6 +192,7 @@ def news(symbol):
     news_data = json.loads(news_json_str)
     length = len(news_data['news'])
     
+    #parses the JSON
     for x in range(0,length):
         
         news_headline = news_data['news'][x]['headline']
@@ -197,9 +206,10 @@ def news(symbol):
 
 
 
-#gets todays news articles for the stock 
+#gets todays stock twits articles for the stock 
 def stock_twits(symbol):
     
+    #gets the data from the API
     sleep(3)
     url = 'https://api.stocktwits.com/api/2/streams/symbol/' + symbol.upper() + '.json'
     stock_twits = requests.get(url)
@@ -208,6 +218,7 @@ def stock_twits(symbol):
     length = len(stock_twits_data['messages'])
     total_sent = 0
     
+    #parses the data out of the JSON
     for x in range(0,length):
         
         message = stock_twits_data['messages'][x]['body']
@@ -218,7 +229,7 @@ def stock_twits(symbol):
         output = str(x + 1) + ") " + message + "[" + string_sent + "]"
         print('\033[0m' + output)
         
-    
+    #outputs the data
     total_sent = total_sent/30
     total_sent = '{:.1f}'.format(total_sent)
     print('\n')
@@ -226,7 +237,7 @@ def stock_twits(symbol):
     
     return
 
-
+#sent analysis for news articles
 def sent_analysis(text):
     testimonial = TextBlob(text)
     sentiment = float(testimonial.sentiment.polarity) * 100
@@ -235,15 +246,19 @@ def sent_analysis(text):
     
     return(string_sent)
 
+
+#sent analsysis for stocktwits
 def stocktwits_sent_analysis(text):
     testimonial = TextBlob(text)
     sentiment = float(testimonial.sentiment.polarity) * 100
     
     return(sentiment)
 
+
+#makes a line for cleaner sections to our outputs
 def line():
     line = ""
-    for x in range(0,150):
+    for x in range(0,147):
         line = line + "*"
     print(line)
     return
